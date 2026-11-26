@@ -1,6 +1,10 @@
 # Bento64 自动构建
 
-仓库：`yangyq081/Bento64`。目前为私有仓库，源码和构建产物需要仓库访问权限才能查看。
+仓库：[yangyq081/Bento64](https://github.com/yangyq081/Bento64)，现已公开。
+
+普通用户请前往 [Releases 发布页](https://github.com/yangyq081/Bento64/releases/latest) 下载安装包，无需 GitHub 账号。当前已发布 0.2.1 的 Mac Apple Silicon DMG 和 Windows x64 完整离线 EXE，附带 SHA-256 校验值。
+
+下文的 Actions 构建产物用于测试和验证，需要登录 GitHub 后下载，默认保留 14 天。Releases 中上传的安装包不受这个 14 天保留期限制。
 
 ## 使用
 
@@ -14,7 +18,7 @@
 
 Artifacts 下载后是 ZIP，解压后才是安装包。文件夹内附带 SHA-256 校验值、版本清单、检查报告和说明，默认保留 14 天；需要长期留存时请自行下载备份。
 
-源码推送到 `main` / `master`、相关代码的 Pull Request、推送 `v*` 标签也会触发构建。工作流会生成可下载的构建产物，不会自动创建公开 Release。
+源码推送到 `main` / `master`、相关代码的 Pull Request、推送 `v*` 标签也会触发构建。工作流会生成可下载的构建产物；公开 Release 需要另外发布，当前工作流不会自动发布新版本。
 
 ## 检查范围
 

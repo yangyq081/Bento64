@@ -2,6 +2,17 @@
 
 安装在电脑上的离线 Base64 工具，使用 Tauri 桌面窗口。应用包内包含界面、转换代码、图标和字符集处理逻辑。转换不依赖 base64.us 或其他服务器，不需要账号，不保存转换历史。
 
+## 下载
+
+在 [Releases 发布页](https://github.com/yangyq081/Bento64/releases/latest) 下载安装包，无需编译源码：
+
+| 平台 | 0.2.1 安装包 | 大小 |
+| --- | --- | --- |
+| Mac Apple 芯片 | [Bento64 DMG](https://github.com/yangyq081/Bento64/releases/download/v0.2.1/Bento64-0.2.1-macOS-AppleSilicon.dmg) | 1.87 MB |
+| Windows x64 | [Bento64 完整离线 EXE](https://github.com/yangyq081/Bento64/releases/download/v0.2.1/Bento64-0.2.1-Windows-x64-offline.exe) | 299.63 MB |
+
+Windows 包含 WebView2 完整离线安装组件。Mac 包适用于 Apple Silicon，要求 macOS 11 或更新版本。校验值、验证范围和签名状态见发布说明；Windows 应用未配置开发者证书，Mac 使用 ad-hoc 本地签名、未公证。
+
 ## 功能
 
 - 文本 Base64 编码与解码，支持 UTF-8 和 GBK（兼容常见 GB2312 文本）。
@@ -18,11 +29,11 @@ Base64 是编码方式，不提供加密保密功能。
 
 Windows 的安装配置采用 `offlineInstaller`，将微软 WebView2 Evergreen Standalone Installer 完整带入安装包。安装应用时无需联网下载 WebView2。如果机器已有满足要求的 WebView2，安装器使用现有组件。Windows 运行库采用静态 CRT 链接。
 
-macOS 的应用包内置所有应用资源，使用随 macOS 提供的 WKWebView，无首次启动依赖下载。当前 Mac 构建以这台开发机的 Apple Silicon 架构为目标；系统最低要求为 macOS 11。
+macOS 的应用包内置所有应用资源，使用随 macOS 提供的 WKWebView，无首次启动依赖下载。当前 Mac 安装包适用于 Apple Silicon；系统最低要求为 macOS 11。
 
 Windows 安装包按处理器架构区分。x64 安装包适用于 x64 Windows；ARM64 Windows 需要 ARM64 构建。请在虚拟机的“设置 → 系统 → 关于”查看系统类型。
 
-安装包属于本地自用构建，未配置商业开发者证书签名或 Apple 公证。
+当前安装包未配置商业开发者证书签名或 Apple 公证。
 
 ## 开发
 
