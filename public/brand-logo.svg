@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 220" width="100%" height="100%">
+  <rect width="400" height="220" fill="#FDFBF7" />
+
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 左侧折角：略低、略窄，形成不对称 -->
+    <path d="M 152 62 L 152 126 L 200 92 L 152 62 Z"
+          stroke="#D4A373" stroke-width="1.4" />
+    <!-- 右侧折角：略高、略宽 -->
+    <path d="M 252 54 L 252 122 L 200 92 L 252 54 Z"
+          stroke="#A8B5A2" stroke-width="1.4" />
+    <!-- 小圆点：韩系点缀，不抢主体 -->
+    <circle cx="200" cy="108" r="3" fill="#D4A373" stroke="none" opacity="0.9" />
+  </g>
+
+  <text x="50%" y="184" text-anchor="middle"
+        font-family="'Helvetica Neue', Arial, sans-serif"
+        font-weight="300" font-size="27" letter-spacing="5" fill="#4A4A4A">
+    <tspan fill="#4A4A4A">Base</tspan><tspan fill="#D4A373">64</tspan>
+  </text>
+</svg>

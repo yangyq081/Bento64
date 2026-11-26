@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.tools/
+src-tauri/target/
+output/
+artifacts/
+.playwright-cli/
+releases/
+.DS_Store

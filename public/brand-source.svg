@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <!-- 纯白干净背景 -->
+  <rect width="500" height="500" fill="#FCFCFA" />
+
+  <!-- ================= 1. 底层：蓝色代码底座 ================= -->
+  <!-- 稍微往下移了一点点 (y=300)，留出更多空间给 B -->
+  <g transform="translate(250, 300)">
+    <!-- 底座的弥散投影 -->
+    <rect x="-120" y="5" width="240" height="140" rx="35" fill="#E5EFF7" />
+    <!-- 底座主体 -->
+    <rect x="-120" y="-5" width="240" height="140" rx="35" fill="#A7C7E7" />
+    
+    <!-- 底座上的白色数据线 -->
+    <g fill="#FFFFFF" opacity="0.6">
+      <rect x="-70" y="35" width="140" height="10" rx="5" />
+      <rect x="-70" y="60" width="100" height="10" rx="5" />
+      <rect x="-40" y="85" width="80" height="10" rx="5" />
+    </g>
+  </g>
+
+  <!-- ================= 2. 顶层：完整的黄色字母 B ================= -->
+  <!-- 去掉了多余的接触面阴影椭圆 -->
+
+  <!-- 核心调整：把 Y 坐标从 200 改到了 275，让它直接压在盒子上 -->
+  <!-- 稍微减小了倾斜角度（-4度），更稳重 -->
+  <g transform="translate(250, 275) rotate(-4)">
+    <!-- 错位阴影（深黄色） -->
+    <text x="12" y="12" text-anchor="middle" 
+          font-family="'Arial Black', 'Helvetica Neue', sans-serif" 
+          font-weight="900" font-size="250" fill="#F0B948" opacity="0.9">B</text>
+          
+    <!-- 字母 B 的本体（完整的、明亮的） -->
+    <text x="0" y="0" text-anchor="middle" 
+          font-family="'Arial Black', 'Helvetica Neue', sans-serif" 
+          font-weight="900" font-size="250" fill="#FFD166">B</text>
+  </g>
+
+  <!-- 为了让 B 看起来像是“稍微嵌入”在盒子里，我们可以在前层补充一小点遮挡 -->
+  <!-- 但不影响 B 的整体性，只是一点点视觉上的融合 -->
+  <path d="M 130 295 Q 250 280 370 295 L 370 310 Q 250 295 130 310 Z" fill="#A7C7E7" opacity="0.8"/>
+</svg>

@@ -1,0 +1,163 @@
+name: Build Bento64 desktop packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      windows_install_check:
+        description: Run the Windows install, startup and uninstall smoke test
+        type: boolean
+        required: true
+        default: true
+  push:
+    branches: [main, master]
+    tags: ["v*"]
+    paths:
+      - ".github/workflows/**"
+      - ".cargo/**"
+      - "src/**"
+      - "public/**"
+      - "src-tauri/**"
+      - "scripts/**"
+      - "tests/**"
+      - "package*.json"
+      - "index.html"
+      - "THIRD_PARTY_NOTICES.txt"
+  pull_request:
+    paths:
+      - ".github/workflows/**"
+      - ".cargo/**"
+      - "src/**"
+      - "public/**"
+      - "src-tauri/**"
+      - "scripts/**"
+      - "tests/**"
+      - "package*.json"
+      - "index.html"
+      - "THIRD_PARTY_NOTICES.txt"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bento64-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: ${{ matrix.artifact }}
+    timeout-minutes: 55
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            platform: macos-arm64
+            target: aarch64-apple-darwin
+            bundles: app,dmg
+            artifact: Bento64-macOS-AppleSilicon
+            tauri_cache: "~/Library/Caches/tauri"
+          - runner: windows-latest
+            platform: windows-x64
+            target: x86_64-pc-windows-msvc
+            bundles: nsis
+            artifact: Bento64-Windows-x64
+            tauri_cache: "~/AppData/Local/tauri"
+    runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      CARGO_TERM_COLOR: always
+      CARGO_INCREMENTAL: "0"
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
+        with:
+          toolchain: stable
+          targets: ${{ matrix.target }}
+
+      - name: Read Rust compiler identity
+        id: rust_version
+        run: |
+          python -c "import hashlib,os,subprocess; key=hashlib.sha256(subprocess.check_output(['rustc','-Vv'])).hexdigest()[:16]; print('compiler='+key,file=open(os.environ['GITHUB_OUTPUT'],'a'))"
+
+      - name: Cache Rust and Tauri build tools
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git/db
+            src-tauri/target
+            ${{ matrix.tauri_cache }}
+          key: desktop-${{ runner.os }}-${{ matrix.target }}-${{ steps.rust_version.outputs.compiler }}-${{ hashFiles('src-tauri/Cargo.lock') }}
+          restore-keys: |
+            desktop-${{ runner.os }}-${{ matrix.target }}-${{ steps.rust_version.outputs.compiler }}-
+
+      - name: Install locked JavaScript dependencies
+        run: npm ci
+
+      - name: Run conversion tests
+        run: |
+          mkdir -p output/ci
+          npm test 2>&1 | tee output/ci/core-tests.log
+
+      - name: Generate platform icons
+        run: npm run tauri -- icon public/icon.svg
+
+      - name: Build native installer
+        run: |
+          npm run tauri -- build --ci --target "${{ matrix.target }}" --bundles "${{ matrix.bundles }}" -- --locked 2>&1 | tee output/ci/build.log
+
+      - name: Verify and collect installer
+        id: collect
+        run: |
+          python scripts/ci/collect-artifacts.py --platform "${{ matrix.platform }}" --target "${{ matrix.target }}" --output "artifacts/${{ matrix.artifact }}"
+
+      - name: Test Windows installation and startup
+        if: matrix.platform == 'windows-x64' && (github.event_name != 'workflow_dispatch' || inputs.windows_install_check)
+        shell: pwsh
+        run: |
+          ./scripts/ci/test-windows-install.ps1 -ArtifactDirectory "artifacts/${{ matrix.artifact }}"
+
+      - name: Refresh artifact checksums
+        if: always() && steps.collect.outcome == 'success'
+        run: |
+          python scripts/ci/collect-artifacts.py --refresh-checksums --output "artifacts/${{ matrix.artifact }}"
+
+      - name: Upload verified installer
+        if: success()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ matrix.artifact }}
+          path: artifacts/${{ matrix.artifact }}/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: diagnostics-${{ matrix.artifact }}
+          path: |
+            output/ci/
+            artifacts/${{ matrix.artifact }}/*.json
+            artifacts/${{ matrix.artifact }}/*.log
+          if-no-files-found: ignore
+          retention-days: 14

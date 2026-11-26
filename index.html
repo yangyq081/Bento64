@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <meta name="description" content="在本机完成 Base64 文本、图片和文件转换。" />
+    <title>Bento64</title>
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="app-header">
+        <div class="identity">
+          <button id="brand-home" class="brand-home" type="button" aria-label="Bento64，重新播放启动动画" title="重新播放启动动画">
+            <img class="brand-header-icon" src="/brand-header-icon.svg" alt="Bento64" width="48" height="48" />
+          </button>
+          <div class="identity-copy">
+            <div class="identity-title">
+              <h1 id="local-title" class="privacy-title" tabindex="0" aria-describedby="privacy-tooltip">本地编码</h1>
+              <span id="privacy-tooltip" class="privacy-tooltip" role="tooltip">本机处理，不上传</span>
+            </div>
+            <p>文本与文件，离线转换</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button id="help-button" class="icon-button" aria-label="使用帮助" title="使用帮助"></button>
+        </div>
+      </header>
+
+      <main>
+        <div class="toolbar">
+          <div class="mode-tabs" role="tablist" aria-label="转换类型">
+            <button id="tab-text" type="button" role="tab" aria-selected="true" aria-controls="workspace" class="mode-tab active" data-mode="text">文本转换</button>
+            <button id="tab-file" type="button" role="tab" aria-selected="false" aria-controls="workspace" class="mode-tab" data-mode="file" tabindex="-1">文件与图片</button>
+          </div>
+          <div class="settings">
+            <label id="charset-setting">字符集
+              <select id="charset"><option value="utf-8">UTF-8</option><option value="gbk">GBK / GB2312</option></select>
+            </label>
+            <label>Base64 格式
+              <select id="variant"><option value="standard">标准 Base64</option><option value="url">Base64URL</option></select>
+            </label>
+          </div>
+        </div>
+
+        <div id="workspace" class="workspace" role="tabpanel" aria-labelledby="tab-text">
+          <section class="editor-pane input-pane" aria-labelledby="input-title">
+            <div class="pane-header">
+              <h2 id="input-title"><span class="pane-marker">输入</span><span id="input-subtitle">原文或 Base64</span></h2>
+              <div class="pane-actions">
+                <button id="import-button" class="text-button" title="从本地文件导入">导入</button>
+                <button id="example-button" class="text-button">示例</button>
+                <button id="clear-button" class="text-button">清空</button>
+              </div>
+            </div>
+            <div id="drop-zone" class="drop-zone" hidden tabindex="0" role="button" aria-label="选择或拖入待编码的文件">
+              <div class="drop-icon" id="drop-icon"></div>
+              <strong id="file-title">拖入文件，或点击选择</strong>
+              <span id="file-detail">图片、文档和其他文件，最大 50 MB</span>
+              <button id="remove-file" type="button" class="text-button" hidden>移除文件</button>
+            </div>
+            <div class="input-editor">
+              <label for="input" class="sr-only">输入内容</label>
+              <textarea id="input" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="粘贴要编码的文本，或要解码的 Base64 内容…"></textarea>
+              <div class="input-shortcut" aria-hidden="true">
+                <span><kbd data-modifier>Ctrl</kbd><kbd>↵</kbd> 编码</span>
+                <span><kbd>Shift</kbd><kbd data-modifier>Ctrl</kbd><kbd>↵</kbd> 解码</span>
+              </div>
+            </div>
+            <div class="pane-footer">
+              <span id="input-count"><span id="count-value" class="count-value">0</span><span id="count-unit" class="count-unit">字符</span></span>
+              <label id="hex-setting" class="check-label"><input id="hex-mode" type="checkbox" />十六进制输入 / 输出</label>
+            </div>
+          </section>
+
+          <div id="pane-resizer" class="pane-resizer" role="separator" tabindex="0" aria-label="调整输入与结果区域宽度" aria-orientation="vertical" aria-valuemin="28" aria-valuemax="72" aria-valuenow="50" aria-valuetext="输入 50%，结果 50%" title="左右拖动调整分栏，双击恢复等宽">
+            <span id="resizer-icon" class="resizer-handle"></span>
+          </div>
+
+          <section class="editor-pane output-pane" aria-labelledby="output-title">
+            <div class="pane-header">
+              <h2 id="output-title"><span class="pane-marker"><span id="output-state-light" class="result-state idle" aria-hidden="true" title="等待转换"></span>结果</span><span id="output-subtitle">等待转换</span></h2>
+              <div class="pane-actions">
+                <button id="copy-button" class="text-button" aria-live="polite" disabled>复制</button>
+                <button id="save-button" class="text-button" disabled>保存</button>
+              </div>
+            </div>
+            <div id="output-empty" class="output-empty">
+              <div class="empty-symbol" aria-hidden="true"><img src="/brand-symbol.svg" alt="" width="108" height="83" /><span id="empty-arrow" hidden></span></div>
+              <p>转换结果会显示在这里</p>
+              <span id="empty-hint">填入示例，或在左侧输入需要转换的内容</span>
+              <div class="empty-actions">
+                <button id="empty-example-button" class="empty-action" title="将示例填入左侧输入区">填入示例</button>
+                <button id="empty-import-button" class="empty-action">导入文本</button>
+              </div>
+            </div>
+            <label for="output" class="sr-only">转换结果</label>
+            <textarea id="output" spellcheck="false" readonly hidden></textarea>
+            <div id="binary-result" class="binary-result" hidden>
+              <img id="image-preview" alt="解码图片预览" hidden />
+              <div id="binary-icon"></div>
+              <strong id="binary-name"></strong>
+              <span id="binary-detail"></span>
+              <button id="save-binary-button" class="secondary-button">保存文件</button>
+            </div>
+            <div class="pane-footer">
+              <span id="output-count">尚无结果</span>
+              <label class="check-label"><input id="wrap-output" type="checkbox" checked />自动换行</label>
+            </div>
+          </section>
+        </div>
+
+        <div class="action-bar">
+          <div class="conversion-actions">
+            <button id="encode-button" class="primary-button"><span id="encode-icon"></span>编码为 Base64</button>
+            <button id="decode-button" class="secondary-button"><span id="decode-icon"></span>解码 Base64</button>
+            <button id="swap-button" class="quiet-button swap-button" aria-label="结果移到输入" title="将结果移到输入区" disabled><span id="swap-icon"></span><span class="sr-only">结果移到输入</span></button>
+          </div>
+          <label id="data-uri-setting" class="check-label" hidden><input id="data-uri" type="checkbox" checked />包含 Data URI 前缀</label>
+          <label id="padding-setting" class="check-label"><input id="padding" type="checkbox" checked />保留末尾 = 补位</label>
+        </div>
+        <div id="status" class="status" role="status" aria-live="polite"><span id="status-icon"></span><span id="status-message">已就绪，可输入内容或导入文件。</span></div>
+      </main>
+
+      <footer class="app-footer"><span>Bento64 <span class="version">v0.2.1</span></span><span><kbd id="modifier-key">Ctrl</kbd> + <kbd>Enter</kbd> 编码 <span class="shortcut-divider">/</span> 加 <kbd>Shift</kbd> 解码</span></footer>
+    </div>
+
+    <div id="page-drop-notice" class="page-drop-notice" aria-live="polite" hidden><span id="page-drop-icon"></span>松开文件，在本机转换</div>
+    <input id="file-picker" type="file" hidden />
+    <dialog id="help-dialog">
+      <div class="dialog-heading"><h2>使用帮助</h2><button id="close-help" class="icon-button" aria-label="关闭帮助"></button></div>
+      <div class="help-content">
+        <h3>文本转换</h3>
+        <p>在左侧粘贴原文，点击“编码为 Base64”。粘贴 Base64 后点击“解码 Base64”，可以还原原文。通常使用 UTF-8；旧系统的中文内容可尝试 GBK / GB2312。</p>
+        <h3>文件与图片</h3>
+        <p>拖入或选择文件进行编码。需要还原文件时，在输入框粘贴 Base64 或 Data URI，点击解码，再保存文件。单次支持最大 50 MB 的原文件。</p>
+        <h3>格式选项</h3>
+        <p>Base64URL 用 - 和 _ 替代 + 和 /。解码会自动识别这两种格式和缺失的末尾补位。Data URI 使用带补位的标准 Base64；选择 Base64URL 时会关闭 Data URI 前缀。十六进制模式直接处理字节，不经过字符集转换。GBK 模式兼容常见 GB2312 文本，遇到无法表示的字符会明确提示。</p>
+        <h3>本地处理</h3>
+        <p>转换不连接服务器，不保存历史记录。关闭窗口后，当前内容会清除。Base64 是可还原的编码方式，不能代替加密。</p>
+      </div>
+      <button id="help-done" class="primary-button">知道了</button>
+    </dialog>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
