@@ -34,9 +34,9 @@ def run(command: list[str], **kwargs) -> str:
 
 
 def metadata() -> tuple[str, str, str]:
-    package = json.loads((ROOT / "package.json").read_text())
-    config = json.loads((ROOT / "src-tauri/tauri.conf.json").read_text())
-    cargo = tomllib.loads((ROOT / "src-tauri/Cargo.toml").read_text())
+    package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+    config = json.loads((ROOT / "src-tauri/tauri.conf.json").read_text(encoding="utf-8"))
+    cargo = tomllib.loads((ROOT / "src-tauri/Cargo.toml").read_text(encoding="utf-8"))
     version = package["version"]
     require(version == config["version"] == cargo["package"]["version"], "Application versions disagree")
     product = config["productName"]

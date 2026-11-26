@@ -69,6 +69,7 @@ jobs:
     env:
       CARGO_TERM_COLOR: always
       CARGO_INCREMENTAL: "0"
+      PYTHONUTF8: "1"
 
     steps:
       - name: Check out source
@@ -97,8 +98,9 @@ jobs:
         run: |
           python -c "import hashlib,os,subprocess; key=hashlib.sha256(subprocess.check_output(['rustc','-Vv'])).hexdigest()[:16]; print('compiler='+key,file=open(os.environ['GITHUB_OUTPUT'],'a'))"
 
-      - name: Cache Rust and Tauri build tools
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      - name: Restore Rust and Tauri build tools
+        id: build_cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.cargo/registry
@@ -161,3 +163,14 @@ jobs:
             artifacts/${{ matrix.artifact }}/*.log
           if-no-files-found: ignore
           retention-days: 14
+
+      - name: Save Rust and Tauri build tools
+        if: always() && steps.build_cache.outcome == 'success' && steps.build_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git/db
+            src-tauri/target
+            ${{ matrix.tauri_cache }}
+          key: desktop-${{ runner.os }}-${{ matrix.target }}-${{ steps.rust_version.outputs.compiler }}-${{ hashFiles('src-tauri/Cargo.lock') }}
